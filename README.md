@@ -23,7 +23,7 @@ Jellyfin API key или вручную созданный токен не нуж
 
 1. В Jellyfin открыть «Панель управления → Плагины → Репозитории».
 2. Добавить репозиторий:
-   `https://raw.githubusercontent.com/dmitrijovsjanik/filmber-jellyfin-plugin/main/repository/manifest.json`.
+   `https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/latest/download/manifest.json`.
 3. Установить Filmber Sync из каталога и перезапустить Jellyfin.
 4. Открыть «Панель управления → Плагины → Filmber Sync».
 5. Нажать «Подключить» напротив пользователя Jellyfin.

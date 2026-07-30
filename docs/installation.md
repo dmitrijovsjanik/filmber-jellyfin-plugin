@@ -18,7 +18,7 @@
 4. Вставьте URL:
 
 ```text
-https://raw.githubusercontent.com/dmitrijovsjanik/filmber-jellyfin-plugin/main/repository/manifest.json
+https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/latest/download/manifest.json
 ```
 
 5. Сохраните репозиторий.
