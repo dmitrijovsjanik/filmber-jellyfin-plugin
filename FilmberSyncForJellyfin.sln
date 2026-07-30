@@ -1,0 +1,22 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+#
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.FilmberSync", "Jellyfin.Plugin.FilmberSync\Jellyfin.Plugin.FilmberSync.csproj", "{3F1E5272-8388-41D9-B028-12FDB7809910}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.FilmberSync.Tests", "Jellyfin.Plugin.FilmberSync.Tests\Jellyfin.Plugin.FilmberSync.Tests.csproj", "{FD122607-F96D-4836-8964-B297EF15D8DA}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {3F1E5272-8388-41D9-B028-12FDB7809910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {3F1E5272-8388-41D9-B028-12FDB7809910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {3F1E5272-8388-41D9-B028-12FDB7809910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {3F1E5272-8388-41D9-B028-12FDB7809910}.Release|Any CPU.Build.0 = Release|Any CPU
+        {FD122607-F96D-4836-8964-B297EF15D8DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {FD122607-F96D-4836-8964-B297EF15D8DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {FD122607-F96D-4836-8964-B297EF15D8DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {FD122607-F96D-4836-8964-B297EF15D8DA}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+EndGlobal

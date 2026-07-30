@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.idea/
+.nuget/
+artifacts/
+.DS_Store
+docker/config/
+docker/cache/
+docker/jellyfin-*/config/
+docker/jellyfin-*/cache/
+docker/media/
+docker/mock-events.jsonl

@@ -1,0 +1,14 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.8
+    container_name: filmber-sync-jellyfin
+    ports:
+      - "127.0.0.1:8096:8096"
+    volumes:
+      - ./docker/config:/config
+      - ./docker/cache:/cache
+      - ./docker/media:/media:ro
+      - ./artifacts/jellyfin-10.11.8/plugin:/config/plugins/Filmber Sync
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

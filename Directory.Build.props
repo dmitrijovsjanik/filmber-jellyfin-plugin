@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <Version>0.1.0.0</Version>
+        <AssemblyVersion>0.1.0.0</AssemblyVersion>
+        <FileVersion>0.1.0.0</FileVersion>
+        <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">10.11.8</JellyfinVersion>
+        <JellyfinTargetAbi>10.11.0.0</JellyfinTargetAbi>
+        <PluginTargetFramework>net9.0</PluginTargetFramework>
+    </PropertyGroup>
+</Project>

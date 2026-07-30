@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Filmber Sync</title>
+</head>
+<body>
+    <div id="FilmberSyncConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <h2>Filmber Sync</h2>
+                <p>Sync playback progress and watched status from Jellyfin to Filmber.</p>
+                <form id="FilmberSyncConfigForm">
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="EnableSync" type="checkbox" is="emby-checkbox">
+                            <span>Enable synchronization</span>
+                        </label>
+                        <div class="fieldDescription">Only explicitly connected Jellyfin users are synchronized.</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="FilmberBaseUrl">Filmber address</label>
+                        <input id="FilmberBaseUrl" type="url" is="emby-input" placeholder="https://filmber.online">
+                        <div class="fieldDescription">HTTPS is required outside local development.</div>
+                    </div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </form>
+
+                <h2>Users</h2>
+                <p>Connect each Jellyfin user to the matching Filmber account.</p>
+                <div id="FilmberSyncUsers"></div>
+                <div id="FilmberSyncPairing" style="display:none; margin-top:1.5em;">
+                    <h3>Connect to Filmber</h3>
+                    <p>Enter this one-time code in Filmber:</p>
+                    <div id="FilmberSyncCode" style="font-size:2em; font-weight:600; letter-spacing:.15em;"></div>
+                    <p id="FilmberSyncPairingStatus" class="fieldDescription"></p>
+                    <button id="FilmberSyncCancelPairing" is="emby-button" type="button" class="raised emby-button">
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                var page = document.querySelector('#FilmberSyncConfigPage');
+                var pairing = null;
+                var pollTimer = null;
+
+                function request(path, method, body) {
+                    return ApiClient.ajax({
+                        type: method || 'GET',
+                        url: ApiClient.getUrl(path),
+                        data: body ? JSON.stringify(body) : undefined,
+                        contentType: body ? 'application/json' : undefined,
+                        dataType: 'json'
+                    });
+                }
+
+                function stopPairing() {
+                    if (pollTimer) {
+                        clearTimeout(pollTimer);
+                        pollTimer = null;
+                    }
+
+                    pairing = null;
+                    page.querySelector('#FilmberSyncPairing').style.display = 'none';
+                }
+
+                function renderUsers(users) {
+                    var container = page.querySelector('#FilmberSyncUsers');
+                    container.textContent = '';
+                    users.forEach(function (user) {
+                        var row = document.createElement('div');
+                        row.style.display = 'flex';
+                        row.style.alignItems = 'center';
+                        row.style.justifyContent = 'space-between';
+                        row.style.gap = '1em';
+                        row.style.padding = '.75em 0';
+
+                        var identity = document.createElement('div');
+                        var name = document.createElement('div');
+                        name.textContent = user.name;
+                        var status = document.createElement('div');
+                        status.className = 'fieldDescription';
+                        status.textContent = user.paired ? 'Connected to Filmber' : 'Not connected';
+                        identity.appendChild(name);
+                        identity.appendChild(status);
+
+                        var button = document.createElement('button');
+                        button.setAttribute('is', 'emby-button');
+                        button.type = 'button';
+                        button.className = 'raised emby-button';
+                        button.textContent = user.paired ? 'Disconnect' : 'Connect';
+                        button.addEventListener('click', function () {
+                            if (user.paired) {
+                                disconnectUser(user.id);
+                            } else {
+                                startPairing(user.id);
+                            }
+                        });
+
+                        row.appendChild(identity);
+                        row.appendChild(button);
+                        container.appendChild(row);
+                    });
+                }
+
+                function loadState() {
+                    Dashboard.showLoadingMsg();
+                    return request('FilmberSync/state').then(function (state) {
+                        page.querySelector('#EnableSync').checked = state.enableSync;
+                        page.querySelector('#FilmberBaseUrl').value = state.filmberBaseUrl || '';
+                        renderUsers(state.users || []);
+                        Dashboard.hideLoadingMsg();
+                    }).catch(function () {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Could not load Filmber Sync settings.');
+                    });
+                }
+
+                function startPairing(jellyfinUserId) {
+                    stopPairing();
+                    Dashboard.showLoadingMsg();
+                    request('FilmberSync/pair/start', 'POST', {
+                        jellyfinUserId: jellyfinUserId
+                    }).then(function (result) {
+                        pairing = {
+                            pairingId: result.pairingId,
+                            jellyfinUserId: jellyfinUserId
+                        };
+                        page.querySelector('#FilmberSyncCode').textContent = result.code;
+                        page.querySelector('#FilmberSyncPairingStatus').textContent = 'Waiting for approval in Filmber…';
+                        page.querySelector('#FilmberSyncPairing').style.display = '';
+                        Dashboard.hideLoadingMsg();
+                        pollPairing();
+                    }).catch(function () {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Could not start Filmber pairing.');
+                    });
+                }
+
+                function pollPairing() {
+                    if (!pairing) {
+                        return;
+                    }
+
+                    request('FilmberSync/pair/poll', 'POST', pairing).then(function (result) {
+                        if (!pairing) {
+                            return;
+                        }
+
+                        if (result.status === 'approved') {
+                            stopPairing();
+                            Dashboard.alert('Jellyfin user connected to Filmber.');
+                            loadState();
+                            return;
+                        }
+
+                        if (result.status === 'expired') {
+                            page.querySelector('#FilmberSyncPairingStatus').textContent = 'The code expired. Start again.';
+                            pairing = null;
+                            return;
+                        }
+
+                        pollTimer = setTimeout(pollPairing, 3000);
+                    }).catch(function () {
+                        if (pairing) {
+                            pollTimer = setTimeout(pollPairing, 5000);
+                        }
+                    });
+                }
+
+                function disconnectUser(jellyfinUserId) {
+                    Dashboard.showLoadingMsg();
+                    request('FilmberSync/pair/disconnect', 'POST', {
+                        jellyfinUserId: jellyfinUserId
+                    }).then(function () {
+                        Dashboard.hideLoadingMsg();
+                        loadState();
+                    }).catch(function () {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Could not disconnect the user.');
+                    });
+                }
+
+                page.addEventListener('pageshow', loadState);
+                page.addEventListener('pagehide', stopPairing);
+                page.querySelector('#FilmberSyncCancelPairing').addEventListener('click', stopPairing);
+                page.querySelector('#FilmberSyncConfigForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    request('FilmberSync/settings', 'POST', {
+                        enableSync: page.querySelector('#EnableSync').checked,
+                        filmberBaseUrl: page.querySelector('#FilmberBaseUrl').value.trim()
+                    }).then(function () {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Filmber Sync settings saved.');
+                    }).catch(function () {
+                        Dashboard.hideLoadingMsg();
+                        Dashboard.alert('Could not save Filmber Sync settings.');
+                    });
+                    return false;
+                });
+            }());
+        </script>
+    </div>
+</body>
+</html>
