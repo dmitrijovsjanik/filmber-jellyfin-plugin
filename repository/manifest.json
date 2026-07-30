@@ -8,12 +8,12 @@
     "category": "General",
     "versions": [
       {
-        "version": "0.2.0.0",
+        "version": "0.2.0.1",
         "changelog": "Separate Jellyfin onboarding, automatic token pairing, session expiry, and remote revoke.",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/download/v0.2.0.0/filmber-sync_0.2.0.0_jellyfin-10.11.8.zip",
-        "checksum": "c9c76bc2d0271187e90daabbe08cb46c",
-        "timestamp": "2026-07-30T17:24:48Z"
+        "sourceUrl": "https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/download/v0.2.0.1/filmber-sync_0.2.0.1_jellyfin-10.11.8.zip",
+        "checksum": "cb96aabae1334fd5b049bbb0d516b22e",
+        "timestamp": "2026-07-30T17:28:12Z"
       }
     ]
   }

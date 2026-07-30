@@ -53,7 +53,7 @@ Jellyfin API key или вручную созданный токен не нуж
 
 Сборка создаёт:
 
-- `artifacts/jellyfin-10.11.8/repository/filmber-sync_0.2.0.0_jellyfin-10.11.8.zip`;
+- `artifacts/jellyfin-10.11.8/repository/filmber-sync_0.2.0.1_jellyfin-10.11.8.zip`;
 - `artifacts/jellyfin-10.11.8/repository/manifest.json`;
 - `artifacts/jellyfin-10.11.8/build.yaml`.
 
