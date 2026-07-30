@@ -30,7 +30,7 @@ cp "${publish_dir}/Jellyfin.Plugin.FilmberSync.dll" "${plugin_dir}/"
   zip -q -FS "${repository_dir}/${zip_name}" Jellyfin.Plugin.FilmberSync.dll
 )
 
-checksum="$(shasum -a 256 "${repository_dir}/${zip_name}" | awk '{print $1}')"
+checksum="$(openssl dgst -md5 -r "${repository_dir}/${zip_name}" | awk '{print $1}')"
 timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 python3 "${repo_dir}/scripts/write-manifest.py" \
