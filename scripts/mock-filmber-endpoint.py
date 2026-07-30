@@ -76,6 +76,17 @@ class Handler(BaseHTTPRequestHandler):
             },
         )
 
+    def do_DELETE(self) -> None:
+        if self.path != "/api/external/session":
+            self.send_error(404)
+            return
+
+        if self.headers.get("Authorization") != "Bearer local-filmber-token":
+            self.send_json(401, {"error": "unauthorized"})
+            return
+
+        self.send_json(200, {"success": True})
+
     def create_pairing(self) -> None:
         try:
             payload = self.read_json()

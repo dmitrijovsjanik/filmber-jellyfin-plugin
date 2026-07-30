@@ -130,7 +130,7 @@ public sealed class PlaybackEventMonitor : IHostedService
             eventKind,
             playedToCompletion);
         if (observation is null
-            || _configurationStore.GetMapping(observation.JellyfinUserId) is null)
+            || _configurationStore.GetActiveMapping(observation.JellyfinUserId) is null)
         {
             return;
         }
@@ -155,7 +155,7 @@ public sealed class PlaybackEventMonitor : IHostedService
             eventKind,
             playedToCompletion);
         if (observation is null
-            || _configurationStore.GetMapping(observation.JellyfinUserId) is null)
+            || _configurationStore.GetActiveMapping(observation.JellyfinUserId) is null)
         {
             return;
         }

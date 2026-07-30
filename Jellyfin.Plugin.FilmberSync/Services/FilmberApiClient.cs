@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -87,8 +88,8 @@ public sealed class FilmberApiClient : IEventSink
         FilmberPlaybackPayload payload,
         CancellationToken cancellationToken)
     {
-        var mapping = _configurationStore.GetMapping(payload.JellyfinUserId);
-        if (mapping is null || string.IsNullOrWhiteSpace(mapping.AccessToken))
+        var mapping = _configurationStore.GetActiveMapping(payload.JellyfinUserId);
+        if (mapping is null)
         {
             return EventDeliveryOutcome.Discard;
         }
@@ -132,6 +133,32 @@ public sealed class FilmberApiClient : IEventSink
         return body.Results.All(result => result.Ok)
             ? EventDeliveryOutcome.Delivered
             : EventDeliveryOutcome.Retry;
+    }
+
+    /// <summary>
+    /// Revokes a stored external session in Filmber.
+    /// </summary>
+    public async Task<bool> RevokeSessionAsync(
+        UserMappingConfiguration mapping,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(mapping.AccessToken)
+            || !TryGetBaseUri(Plugin.Instance?.Configuration.FilmberBaseUrl, out var baseUri))
+        {
+            return false;
+        }
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Delete,
+            new Uri(baseUri, "api/external/session"));
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            mapping.AccessToken);
+        using var response = await _httpClient.SendAsync(
+            request,
+            cancellationToken).ConfigureAwait(false);
+        return response.IsSuccessStatusCode
+            || response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.NotFound;
     }
 
     /// <summary>

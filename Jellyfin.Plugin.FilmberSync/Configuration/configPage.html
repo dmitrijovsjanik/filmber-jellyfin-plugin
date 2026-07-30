@@ -2,43 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filmber Sync</title>
+    <title>Filmber Sync for Jellyfin</title>
 </head>
 <body>
     <div id="FilmberSyncConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
         <div data-role="content">
             <div class="content-primary">
-                <h2>Filmber Sync</h2>
-                <p>Sync playback progress and watched status from Jellyfin to Filmber.</p>
+                <h2 data-i18n="title">Filmber Sync for Jellyfin</h2>
+                <p data-i18n="description">Watched movies, episodes, and playback progress are saved to Filmber automatically from every Jellyfin client.</p>
+
+                <div class="paperList" style="padding:1em; margin:1.5em 0;">
+                    <strong data-i18n="howTitle">How it works</strong>
+                    <ol style="margin-bottom:0;">
+                        <li data-i18n="howOne">Choose the Jellyfin user you want to connect.</li>
+                        <li data-i18n="howTwo">Open Filmber → Profile → Settings → Jellyfin and enter the one-time code.</li>
+                        <li data-i18n="howThree">Confirm the connection. No token needs to be created or copied.</li>
+                    </ol>
+                </div>
+
                 <form id="FilmberSyncConfigForm">
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="EnableSync" type="checkbox" is="emby-checkbox">
-                            <span>Enable synchronization</span>
+                            <span data-i18n="enable">Enable synchronization</span>
                         </label>
-                        <div class="fieldDescription">Only explicitly connected Jellyfin users are synchronized.</div>
+                        <div class="fieldDescription" data-i18n="enableHint">Only explicitly connected Jellyfin users are synchronized.</div>
                     </div>
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="FilmberBaseUrl">Filmber address</label>
-                        <input id="FilmberBaseUrl" type="url" is="emby-input" placeholder="https://filmber.online">
-                        <div class="fieldDescription">HTTPS is required outside local development.</div>
-                    </div>
+                    <details style="margin:1em 0;">
+                        <summary data-i18n="advanced">Advanced settings</summary>
+                        <div class="inputContainer" style="margin-top:1em;">
+                            <label class="inputLabel inputLabelUnfocused" for="FilmberBaseUrl" data-i18n="address">Filmber address</label>
+                            <input id="FilmberBaseUrl" type="url" is="emby-input" placeholder="https://filmber.online">
+                            <div class="fieldDescription" data-i18n="addressHint">Keep the default address unless you run your own Filmber environment.</div>
+                        </div>
+                    </details>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button">
-                        <span>Save</span>
+                        <span data-i18n="save">Save</span>
                     </button>
                 </form>
 
-                <h2>Users</h2>
-                <p>Connect each Jellyfin user to the matching Filmber account.</p>
+                <h2 data-i18n="users">Jellyfin users</h2>
+                <p data-i18n="usersHint">Each Jellyfin user connects to their own Filmber account.</p>
                 <div id="FilmberSyncUsers"></div>
-                <div id="FilmberSyncPairing" style="display:none; margin-top:1.5em;">
-                    <h3>Connect to Filmber</h3>
-                    <p>Enter this one-time code in Filmber:</p>
-                    <div id="FilmberSyncCode" style="font-size:2em; font-weight:600; letter-spacing:.15em;"></div>
+
+                <div id="FilmberSyncPairing" class="paperList" style="display:none; margin-top:1.5em; padding:1em;">
+                    <h3 data-i18n="connectTitle">Connect to Filmber</h3>
+                    <p data-i18n="codeHint">Enter this code in Filmber → Profile → Settings → Jellyfin:</p>
+                    <div id="FilmberSyncCode" style="font-size:2em; font-weight:600; letter-spacing:.15em; margin:.5em 0;"></div>
+                    <div style="display:flex; flex-wrap:wrap; gap:.5em;">
+                        <button id="FilmberSyncCopyCode" is="emby-button" type="button" class="raised emby-button">
+                            <span data-i18n="copyCode">Copy code</span>
+                        </button>
+                        <a id="FilmberSyncOpenFilmber" is="emby-button" class="raised emby-button" target="_blank" rel="noopener noreferrer" data-i18n="openFilmber">Open Filmber</a>
+                        <button id="FilmberSyncCancelPairing" is="emby-button" type="button" class="raised emby-button">
+                            <span data-i18n="cancel">Cancel</span>
+                        </button>
+                    </div>
                     <p id="FilmberSyncPairingStatus" class="fieldDescription"></p>
-                    <button id="FilmberSyncCancelPairing" is="emby-button" type="button" class="raised emby-button">
-                        <span>Cancel</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -47,6 +67,85 @@
                 var page = document.querySelector('#FilmberSyncConfigPage');
                 var pairing = null;
                 var pollTimer = null;
+                var state = null;
+                var isRussian = (navigator.language || '').toLowerCase().indexOf('ru') === 0;
+                var copy = isRussian ? {
+                    title: 'Filmber Sync для Jellyfin',
+                    description: 'Просмотренные фильмы, эпизоды и прогресс автоматически сохраняются в Filmber из любого приложения Jellyfin.',
+                    howTitle: 'Как это работает',
+                    howOne: 'Выберите пользователя Jellyfin, которого хотите подключить.',
+                    howTwo: 'Откройте Filmber → Профиль → Настройки → Jellyfin и введите одноразовый код.',
+                    howThree: 'Подтвердите подключение. Создавать или копировать токен не нужно.',
+                    enable: 'Включить синхронизацию',
+                    enableHint: 'Синхронизируются только подключённые пользователи Jellyfin.',
+                    advanced: 'Дополнительные настройки',
+                    address: 'Адрес Filmber',
+                    addressHint: 'Оставьте адрес по умолчанию, если не используете собственный Filmber.',
+                    save: 'Сохранить',
+                    users: 'Пользователи Jellyfin',
+                    usersHint: 'Каждый пользователь Jellyfin подключается к своему аккаунту Filmber.',
+                    connectTitle: 'Подключение к Filmber',
+                    codeHint: 'Введите этот код в Filmber → Профиль → Настройки → Jellyfin:',
+                    copyCode: 'Скопировать код',
+                    copied: 'Код скопирован',
+                    openFilmber: 'Открыть Filmber',
+                    cancel: 'Отмена',
+                    connected: 'Подключён к Filmber',
+                    expired: 'Подключение истекло — подключите заново',
+                    notConnected: 'Не подключён',
+                    connect: 'Подключить',
+                    reconnect: 'Подключить заново',
+                    disconnect: 'Отключить',
+                    waiting: 'Ждём подтверждения в Filmber…',
+                    codeExpired: 'Код истёк. Начните подключение заново.',
+                    connectedAlert: 'Пользователь Jellyfin подключён к Filmber.',
+                    loadError: 'Не удалось загрузить настройки Filmber Sync.',
+                    pairError: 'Не удалось начать подключение к Filmber.',
+                    disconnectError: 'Не удалось отозвать подключение. Повторите попытку.',
+                    saved: 'Настройки Filmber Sync сохранены.',
+                    saveError: 'Не удалось сохранить настройки Filmber Sync.'
+                } : {
+                    title: 'Filmber Sync for Jellyfin',
+                    description: 'Watched movies, episodes, and playback progress are saved to Filmber automatically from every Jellyfin client.',
+                    howTitle: 'How it works',
+                    howOne: 'Choose the Jellyfin user you want to connect.',
+                    howTwo: 'Open Filmber → Profile → Settings → Jellyfin and enter the one-time code.',
+                    howThree: 'Confirm the connection. No token needs to be created or copied.',
+                    enable: 'Enable synchronization',
+                    enableHint: 'Only explicitly connected Jellyfin users are synchronized.',
+                    advanced: 'Advanced settings',
+                    address: 'Filmber address',
+                    addressHint: 'Keep the default address unless you run your own Filmber environment.',
+                    save: 'Save',
+                    users: 'Jellyfin users',
+                    usersHint: 'Each Jellyfin user connects to their own Filmber account.',
+                    connectTitle: 'Connect to Filmber',
+                    codeHint: 'Enter this code in Filmber → Profile → Settings → Jellyfin:',
+                    copyCode: 'Copy code',
+                    copied: 'Code copied',
+                    openFilmber: 'Open Filmber',
+                    cancel: 'Cancel',
+                    connected: 'Connected to Filmber',
+                    expired: 'Connection expired — connect again',
+                    notConnected: 'Not connected',
+                    connect: 'Connect',
+                    reconnect: 'Connect again',
+                    disconnect: 'Disconnect',
+                    waiting: 'Waiting for approval in Filmber…',
+                    codeExpired: 'The code expired. Start again.',
+                    connectedAlert: 'Jellyfin user connected to Filmber.',
+                    loadError: 'Could not load Filmber Sync settings.',
+                    pairError: 'Could not start Filmber pairing.',
+                    disconnectError: 'Could not revoke the connection. Try again.',
+                    saved: 'Filmber Sync settings saved.',
+                    saveError: 'Could not save Filmber Sync settings.'
+                };
+
+                function translatePage() {
+                    page.querySelectorAll('[data-i18n]').forEach(function (element) {
+                        element.textContent = copy[element.getAttribute('data-i18n')];
+                    });
+                }
 
                 function request(path, method, body) {
                     return ApiClient.ajax({
@@ -63,7 +162,6 @@
                         clearTimeout(pollTimer);
                         pollTimer = null;
                     }
-
                     pairing = null;
                     page.querySelector('#FilmberSyncPairing').style.display = 'none';
                 }
@@ -84,7 +182,11 @@
                         name.textContent = user.name;
                         var status = document.createElement('div');
                         status.className = 'fieldDescription';
-                        status.textContent = user.paired ? 'Connected to Filmber' : 'Not connected';
+                        status.textContent = user.status === 'connected'
+                            ? copy.connected
+                            : user.status === 'expired'
+                                ? copy.expired
+                                : copy.notConnected;
                         identity.appendChild(name);
                         identity.appendChild(status);
 
@@ -92,15 +194,22 @@
                         button.setAttribute('is', 'emby-button');
                         button.type = 'button';
                         button.className = 'raised emby-button';
-                        button.textContent = user.paired ? 'Disconnect' : 'Connect';
+                        button.textContent = user.status === 'connected'
+                            ? copy.disconnect
+                            : user.status === 'expired'
+                                ? copy.reconnect
+                                : copy.connect;
                         button.addEventListener('click', function () {
-                            if (user.paired) {
+                            if (user.status === 'connected') {
                                 disconnectUser(user.id);
+                            } else if (user.status === 'expired') {
+                                disconnectUser(user.id, function () {
+                                    startPairing(user.id);
+                                });
                             } else {
                                 startPairing(user.id);
                             }
                         });
-
                         row.appendChild(identity);
                         row.appendChild(button);
                         container.appendChild(row);
@@ -109,14 +218,15 @@
 
                 function loadState() {
                     Dashboard.showLoadingMsg();
-                    return request('FilmberSync/state').then(function (state) {
-                        page.querySelector('#EnableSync').checked = state.enableSync;
-                        page.querySelector('#FilmberBaseUrl').value = state.filmberBaseUrl || '';
-                        renderUsers(state.users || []);
+                    return request('FilmberSync/state').then(function (result) {
+                        state = result;
+                        page.querySelector('#EnableSync').checked = result.enableSync;
+                        page.querySelector('#FilmberBaseUrl').value = result.filmberBaseUrl || '';
+                        renderUsers(result.users || []);
                         Dashboard.hideLoadingMsg();
                     }).catch(function () {
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Could not load Filmber Sync settings.');
+                        Dashboard.alert(copy.loadError);
                     });
                 }
 
@@ -131,63 +241,62 @@
                             jellyfinUserId: jellyfinUserId
                         };
                         page.querySelector('#FilmberSyncCode').textContent = result.code;
-                        page.querySelector('#FilmberSyncPairingStatus').textContent = 'Waiting for approval in Filmber…';
+                        page.querySelector('#FilmberSyncPairingStatus').textContent = copy.waiting;
+                        var filmberBaseUrl = (state && state.filmberBaseUrl) || 'https://filmber.online';
+                        page.querySelector('#FilmberSyncOpenFilmber').href =
+                            filmberBaseUrl.replace(/\/+$/, '') + '/connect?code=' + encodeURIComponent(result.code);
                         page.querySelector('#FilmberSyncPairing').style.display = '';
                         Dashboard.hideLoadingMsg();
                         pollPairing();
                     }).catch(function () {
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Could not start Filmber pairing.');
+                        Dashboard.alert(copy.pairError);
                     });
                 }
 
                 function pollPairing() {
-                    if (!pairing) {
-                        return;
-                    }
-
+                    if (!pairing) return;
                     request('FilmberSync/pair/poll', 'POST', pairing).then(function (result) {
-                        if (!pairing) {
-                            return;
-                        }
-
+                        if (!pairing) return;
                         if (result.status === 'approved') {
                             stopPairing();
-                            Dashboard.alert('Jellyfin user connected to Filmber.');
+                            Dashboard.alert(copy.connectedAlert);
                             loadState();
                             return;
                         }
-
                         if (result.status === 'expired') {
-                            page.querySelector('#FilmberSyncPairingStatus').textContent = 'The code expired. Start again.';
+                            page.querySelector('#FilmberSyncPairingStatus').textContent = copy.codeExpired;
                             pairing = null;
                             return;
                         }
-
                         pollTimer = setTimeout(pollPairing, 3000);
                     }).catch(function () {
-                        if (pairing) {
-                            pollTimer = setTimeout(pollPairing, 5000);
-                        }
+                        if (pairing) pollTimer = setTimeout(pollPairing, 5000);
                     });
                 }
 
-                function disconnectUser(jellyfinUserId) {
+                function disconnectUser(jellyfinUserId, onDone) {
                     Dashboard.showLoadingMsg();
                     request('FilmberSync/pair/disconnect', 'POST', {
                         jellyfinUserId: jellyfinUserId
                     }).then(function () {
                         Dashboard.hideLoadingMsg();
-                        loadState();
+                        if (onDone) onDone();
+                        else loadState();
                     }).catch(function () {
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Could not disconnect the user.');
+                        Dashboard.alert(copy.disconnectError);
                     });
                 }
 
+                translatePage();
                 page.addEventListener('pageshow', loadState);
                 page.addEventListener('pagehide', stopPairing);
                 page.querySelector('#FilmberSyncCancelPairing').addEventListener('click', stopPairing);
+                page.querySelector('#FilmberSyncCopyCode').addEventListener('click', function () {
+                    navigator.clipboard.writeText(page.querySelector('#FilmberSyncCode').textContent)
+                        .then(function () { Dashboard.alert(copy.copied); });
+                });
                 page.querySelector('#FilmberSyncConfigForm').addEventListener('submit', function (event) {
                     event.preventDefault();
                     Dashboard.showLoadingMsg();
@@ -196,10 +305,11 @@
                         filmberBaseUrl: page.querySelector('#FilmberBaseUrl').value.trim()
                     }).then(function () {
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Filmber Sync settings saved.');
+                        Dashboard.alert(copy.saved);
+                        loadState();
                     }).catch(function () {
                         Dashboard.hideLoadingMsg();
-                        Dashboard.alert('Could not save Filmber Sync settings.');
+                        Dashboard.alert(copy.saveError);
                     });
                     return false;
                 });

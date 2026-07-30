@@ -27,6 +27,35 @@ public sealed class PluginConfigurationStore
     }
 
     /// <summary>
+    /// Finds a mapping whose Filmber session has not expired.
+    /// </summary>
+    public UserMappingConfiguration? GetActiveMapping(string jellyfinUserId)
+    {
+        var mapping = GetMapping(jellyfinUserId);
+        return mapping is not null && IsActive(mapping)
+            ? mapping
+            : null;
+    }
+
+    /// <summary>
+    /// Returns whether a stored mapping can still be used.
+    /// </summary>
+    public static bool IsActive(UserMappingConfiguration mapping)
+    {
+        return !string.IsNullOrWhiteSpace(mapping.AccessToken)
+            && IsUnexpired(mapping);
+    }
+
+    /// <summary>
+    /// Returns whether the mapping expiry is still in the future.
+    /// </summary>
+    public static bool IsUnexpired(UserMappingConfiguration mapping)
+    {
+        return DateTimeOffset.TryParse(mapping.ExpiresAt, out var expiresAt)
+            && expiresAt > DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
     /// Returns a token-free mapping snapshot.
     /// </summary>
     public UserMappingConfiguration[] GetMappings()

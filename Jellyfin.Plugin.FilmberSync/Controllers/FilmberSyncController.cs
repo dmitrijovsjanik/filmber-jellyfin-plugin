@@ -57,11 +57,18 @@ public sealed class FilmberSyncController : ControllerBase
                     item.JellyfinUserId,
                     id,
                     StringComparison.OrdinalIgnoreCase));
+                var connected = mapping is not null
+                    && PluginConfigurationStore.IsUnexpired(mapping);
                 return new
                 {
                     id,
                     name = user.Username,
-                    paired = mapping is not null,
+                    paired = connected,
+                    status = mapping is null
+                        ? "not_connected"
+                        : connected
+                            ? "connected"
+                            : "expired",
                     filmberUserId = mapping?.FilmberUserId,
                     expiresAt = mapping?.ExpiresAt
                 };
@@ -186,12 +193,31 @@ public sealed class FilmberSyncController : ControllerBase
     }
 
     /// <summary>
-    /// Removes a local user-to-Filmber mapping.
+    /// Revokes the Filmber session and removes the local mapping.
     /// </summary>
     [HttpPost("pair/disconnect")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public ActionResult Disconnect([FromBody] DisconnectRequest request)
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult> Disconnect(
+        [FromBody] DisconnectRequest request,
+        CancellationToken cancellationToken)
     {
+        var mapping = _configurationStore.GetMapping(request.JellyfinUserId);
+        if (mapping is null)
+        {
+            return NoContent();
+        }
+
+        var revoked = await _apiClient.RevokeSessionAsync(
+            mapping,
+            cancellationToken).ConfigureAwait(false);
+        if (!revoked)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new { error = "Filmber session could not be revoked." });
+        }
+
         _configurationStore.RemoveMapping(request.JellyfinUserId);
         return NoContent();
     }

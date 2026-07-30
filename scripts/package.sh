@@ -7,7 +7,7 @@ artifacts_dir="${repo_dir}/artifacts/jellyfin-${jellyfin_version}"
 publish_dir="${artifacts_dir}/publish"
 plugin_dir="${artifacts_dir}/plugin"
 repository_dir="${artifacts_dir}/repository"
-plugin_version="0.1.0.0"
+plugin_version="0.2.0.0"
 target_abi="10.11.0.0"
 zip_name="filmber-sync_${plugin_version}_jellyfin-${jellyfin_version}.zip"
 

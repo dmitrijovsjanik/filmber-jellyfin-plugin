@@ -8,14 +8,14 @@ manifest = [
     {
         "guid": "791da508-0885-48c9-b41f-efdce37d1f4a",
         "name": "Filmber Sync",
-        "description": "One-way Jellyfin playback synchronization with Filmber.",
-        "overview": "Synchronize Jellyfin playback with Filmber.",
+        "description": "Save Jellyfin playback progress and watched status to Filmber.",
+        "overview": "Connect each Jellyfin user to Filmber with a one-time code. No manual token is required.",
         "owner": "Filmber",
         "category": "General",
         "versions": [
             {
                 "version": version,
-                "changelog": "Initial pairing, durable playback progress, and watched sync.",
+                "changelog": "Separate Jellyfin onboarding, automatic token pairing, session expiry, and remote revoke.",
                 "targetAbi": target_abi,
                 "sourceUrl": f"http://host.docker.internal:8765/{zip_name}",
                 "checksum": checksum,

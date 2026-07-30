@@ -52,7 +52,7 @@ http://host.docker.internal:8787
 
 ## Ручная установка ZIP
 
-1. Распаковать `artifacts/jellyfin-10.11.8/repository/filmber-sync_0.1.0.0_jellyfin-10.11.8.zip`.
+1. Распаковать `artifacts/jellyfin-10.11.8/repository/filmber-sync_0.2.0.0_jellyfin-10.11.8.zip`.
 2. Создать папку `Filmber Sync` в каталоге plugins Jellyfin.
 3. Скопировать туда `Jellyfin.Plugin.FilmberSync.dll`.
 4. Перезапустить Jellyfin.

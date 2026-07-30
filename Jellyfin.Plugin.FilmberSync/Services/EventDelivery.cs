@@ -35,7 +35,7 @@ public interface IEventSink
 }
 
 /// <summary>
-/// Applies at-least-once delivery while keeping a stable client event ID.
+/// Applies durable at-least-once delivery while keeping a stable client event ID.
 /// </summary>
 public sealed class EventDeliveryService
 {
