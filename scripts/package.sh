@@ -7,9 +7,12 @@ artifacts_dir="${repo_dir}/artifacts/jellyfin-${jellyfin_version}"
 publish_dir="${artifacts_dir}/publish"
 plugin_dir="${artifacts_dir}/plugin"
 repository_dir="${artifacts_dir}/repository"
+public_repository_dir="${repo_dir}/repository"
 plugin_version="0.2.0.0"
 target_abi="10.11.0.0"
 zip_name="filmber-sync_${plugin_version}_jellyfin-${jellyfin_version}.zip"
+release_tag="v${plugin_version}"
+source_url="https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/download/${release_tag}/${zip_name}"
 
 cd "${repo_dir}"
 
@@ -19,7 +22,7 @@ cd "${repo_dir}"
   --output "artifacts/jellyfin-${jellyfin_version}/publish" \
   -p:JellyfinVersion="${jellyfin_version}"
 
-mkdir -p "${plugin_dir}" "${repository_dir}"
+mkdir -p "${plugin_dir}" "${repository_dir}" "${public_repository_dir}"
 cp "${publish_dir}/Jellyfin.Plugin.FilmberSync.dll" "${plugin_dir}/"
 
 (
@@ -36,7 +39,10 @@ python3 "${repo_dir}/scripts/write-manifest.py" \
   "${plugin_version}" \
   "${target_abi}" \
   "${checksum}" \
-  "${timestamp}"
+  "${timestamp}" \
+  "${source_url}"
+
+cp "${repository_dir}/manifest.json" "${public_repository_dir}/manifest.json"
 
 python3 "${repo_dir}/scripts/write-build-yaml.py" \
   "${artifacts_dir}/build.yaml" \

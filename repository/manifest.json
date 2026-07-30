@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "791da508-0885-48c9-b41f-efdce37d1f4a",
+    "name": "Filmber Sync",
+    "description": "Save Jellyfin playback progress and watched status to Filmber.",
+    "overview": "Connect each Jellyfin user to Filmber with a one-time code. No manual token is required.",
+    "owner": "Filmber",
+    "category": "General",
+    "versions": [
+      {
+        "version": "0.2.0.0",
+        "changelog": "Separate Jellyfin onboarding, automatic token pairing, session expiry, and remote revoke.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases/download/v0.2.0.0/filmber-sync_0.2.0.0_jellyfin-10.11.8.zip",
+        "checksum": "ea2abb8beae4fffab020c87c72f3fd5dda0a5178e5608056a117861e4397790a",
+        "timestamp": "2026-07-30T17:21:21Z"
+      }
+    ]
+  }
+]

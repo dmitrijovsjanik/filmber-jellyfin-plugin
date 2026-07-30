@@ -21,10 +21,16 @@ Jellyfin API key или вручную созданный токен не нуж
 
 Коротко:
 
-1. Установить сборку для Jellyfin `10.11.8` и перезапустить сервер.
-2. Открыть «Панель управления → Плагины → Filmber Sync».
-3. Нажать «Подключить» напротив пользователя Jellyfin.
-4. В Filmber открыть «Профиль → Настройки → Jellyfin», ввести код и подтвердить.
+1. В Jellyfin открыть «Панель управления → Плагины → Репозитории».
+2. Добавить репозиторий:
+   `https://raw.githubusercontent.com/dmitrijovsjanik/filmber-jellyfin-plugin/main/repository/manifest.json`.
+3. Установить Filmber Sync из каталога и перезапустить Jellyfin.
+4. Открыть «Панель управления → Плагины → Filmber Sync».
+5. Нажать «Подключить» напротив пользователя Jellyfin.
+6. В Filmber открыть «Профиль → Настройки → Jellyfin», ввести код и подтвердить.
+
+Готовые ZIP-сборки также опубликованы в
+[GitHub Releases](https://github.com/dmitrijovsjanik/filmber-jellyfin-plugin/releases).
 
 ## Совместимость
 

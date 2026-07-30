@@ -3,7 +3,7 @@ import json
 import pathlib
 import sys
 
-output, zip_name, version, target_abi, checksum, timestamp = sys.argv[1:]
+output, zip_name, version, target_abi, checksum, timestamp, source_url = sys.argv[1:]
 manifest = [
     {
         "guid": "791da508-0885-48c9-b41f-efdce37d1f4a",
@@ -17,7 +17,7 @@ manifest = [
                 "version": version,
                 "changelog": "Separate Jellyfin onboarding, automatic token pairing, session expiry, and remote revoke.",
                 "targetAbi": target_abi,
-                "sourceUrl": f"http://host.docker.internal:8765/{zip_name}",
+                "sourceUrl": source_url,
                 "checksum": checksum,
                 "timestamp": timestamp,
             }
